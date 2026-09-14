@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState,useEffect } from 'react'
+import { useState,useEffect ,useCallback} from 'react'
 
 function App() {
   const [value, setValue] = useState("");
@@ -14,10 +14,10 @@ function App() {
     };
   }
 
-  const search = debounce((value) => {
+  const search = useCallback(()=> debounce((value) => {
     console.log("API call:", value);
-  }, 500);
-
+  }, 500), []);
+₹
   useEffect(() => {
     search(value);
   }, [value]);
