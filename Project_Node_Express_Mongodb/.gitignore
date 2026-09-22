@@ -1,0 +1,27 @@
+# ============================================================
+# 🧠 CONCEPT: Keeping secrets out of version control
+# WHY IT MATTERS (interview angle): "How do you manage secrets?" is a
+#   standard question. The answer starts with: .env is NEVER committed;
+#   only .env.example (keys, no values) is.
+# HOW IT WORKS HERE: git ignores every .env variant, node_modules,
+#   build output and uploaded files.
+# ============================================================
+
+node_modules/
+.env
+.env.local
+.env.*.local
+!.env.example
+
+dist/
+build/
+coverage/
+*.log
+npm-debug.log*
+
+server/uploads/*
+!server/uploads/.gitkeep
+
+.DS_Store
+.vscode/
+.idea/

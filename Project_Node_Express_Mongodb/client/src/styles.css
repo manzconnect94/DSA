@@ -1,0 +1,415 @@
+/* Minimal styling. The point of this project is the comments, not the CSS. */
+
+:root {
+  --bg: #0f1117;
+  --panel: #171a23;
+  --border: #272b38;
+  --text: #e6e8ee;
+  --muted: #8b90a0;
+  --accent: #6aa3ff;
+  --good: #3fb950;
+  --warn: #d29922;
+  --bad: #f85149;
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+}
+
+code,
+pre {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 0.875em;
+}
+
+code {
+  background: #0b0d13;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  color: #9ecbff;
+}
+
+pre {
+  background: #0b0d13;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem;
+  overflow-x: auto;
+  max-height: 460px;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Navbar ---------- */
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.nav-brand a {
+  font-weight: 700;
+  color: var(--text);
+}
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+  flex-wrap: wrap;
+}
+.nav-links a.active {
+  color: var(--text);
+  border-bottom: 2px solid var(--accent);
+}
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+/* ---------- Layout ---------- */
+main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.page h1 {
+  margin-bottom: 0.25rem;
+}
+.subtitle {
+  color: var(--muted);
+  margin-top: 0;
+}
+.muted,
+.hint,
+small {
+  color: var(--muted);
+}
+.hint {
+  display: block;
+  font-size: 0.85rem;
+}
+
+/* ---------- Forms ---------- */
+form,
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 0.4rem;
+}
+input,
+select,
+textarea {
+  background: #0b0d13;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+button {
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  color: #05070d;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.5rem 0.9rem;
+  align-self: flex-start;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+.form-row > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.form-error {
+  color: var(--bad);
+  background: rgba(248, 81, 73, 0.1);
+  border: 1px solid rgba(248, 81, 73, 0.3);
+  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
+}
+.form-meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px dashed var(--border);
+  padding-bottom: 0.5rem;
+}
+.validation-hints {
+  color: var(--warn);
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
+  padding-left: 1.2rem;
+}
+.warn {
+  color: var(--warn);
+}
+
+/* ---------- Badges & pills ---------- */
+.badge,
+.pill {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.badge.controlled {
+  background: rgba(106, 163, 255, 0.15);
+  color: var(--accent);
+}
+.badge.uncontrolled {
+  background: rgba(210, 153, 34, 0.15);
+  color: var(--warn);
+}
+.pill.cached,
+.pill.good {
+  background: rgba(63, 185, 80, 0.15);
+  color: var(--good);
+}
+.pill.uncached {
+  background: rgba(210, 153, 34, 0.15);
+  color: var(--warn);
+}
+.pill.warn {
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--bad);
+}
+.pill.role-admin {
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--bad);
+}
+.render-badge {
+  font-size: 0.72rem;
+  color: var(--accent);
+  background: rgba(106, 163, 255, 0.1);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+/* ---------- Task list ---------- */
+.task-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 0.35rem;
+}
+.task-row .task-title {
+  flex: 1;
+}
+.task-row.status-done .task-title {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+.task-row button {
+  background: transparent;
+  color: var(--muted);
+  padding: 0.1rem 0.4rem;
+}
+.task-row button:hover {
+  color: var(--bad);
+}
+.list-controls {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+}
+.filters {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+.filters input[type='search'] {
+  min-width: 260px;
+}
+
+/* ---------- Perf / stats ---------- */
+.perf-bar {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.85rem;
+  margin-bottom: 1rem;
+}
+.perf-bar.good {
+  border-color: rgba(63, 185, 80, 0.5);
+}
+.perf-bar.bad {
+  border-color: rgba(248, 81, 73, 0.5);
+}
+.stat-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+.stat-card {
+  flex: 1;
+  min-width: 190px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.stat-card.warn {
+  border-color: rgba(210, 153, 34, 0.45);
+}
+.stat-card strong {
+  font-size: 1.5rem;
+}
+
+/* ---------- Callouts, demos, tables ---------- */
+.callout,
+.seed-hint {
+  background: rgba(106, 163, 255, 0.07);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+}
+.concept-note {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+.concept-note summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.concept-index {
+  line-height: 1.9;
+}
+.demo-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+.demo-button-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.demo-result {
+  margin-bottom: 1.25rem;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+.data-table th,
+.data-table td,
+.concept-note th,
+.concept-note td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+}
+.data-table th,
+.concept-note th {
+  background: var(--panel);
+}
+.pagination {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+/* ---------- States ---------- */
+.route-loading,
+.forbidden,
+.error-boundary {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin: 1.5rem auto;
+  max-width: 720px;
+}
+.error-boundary {
+  border-color: rgba(248, 81, 73, 0.4);
+}
+.error-boundary pre {
+  font-size: 0.75rem;
+  max-height: 220px;
+}
+.auth-page {
+  max-width: 440px;
+  margin: 2rem auto;
+}

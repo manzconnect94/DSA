@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MERN Interview Boilerplate — Task Manager</title>
+    <!--
+      ============================================================
+      🧠 CONCEPT: The single <div id="root"> — what an SPA actually is
+      WHY IT MATTERS (interview angle): the server sends this almost-empty
+        HTML file. React then builds the ENTIRE page in JavaScript and
+        injects it here. Consequences worth naming:
+        ✅ Navigation after the first load is instant (no full page fetch).
+        ❌ FIRST load is slow-ish: blank page until the JS downloads,
+           parses and executes.
+        ❌ SEO: a crawler that doesn't execute JS sees an empty div.
+           Googlebot does render JS now, but many crawlers and social-media
+           link previewers do not.
+        THE FIXES, and when: SSR (Next.js) renders HTML on the server for
+        fast first paint + SEO; SSG pre-renders at build time for content
+        that rarely changes. The trade-off is server cost and complexity —
+        for an authenticated internal dashboard like this one, a plain SPA
+        is the right call, because SEO is irrelevant and every user pays
+        the JS cost exactly once.
+      ============================================================
+    -->
+  </head>
+  <body>
+    <div id="root"></div>
+    <!--
+      type="module" is what makes native ESM work in the browser, and it is
+      the foundation Vite's dev server is built on. See vite.config.js.
+    -->
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

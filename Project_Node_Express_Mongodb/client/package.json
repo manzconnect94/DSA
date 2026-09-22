@@ -1,0 +1,32 @@
+{
+  "name": "mern-interview-boilerplate-client",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "React (Vite) frontend. ESM on purpose — see src/main.jsx for the CJS vs ESM comparison.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "analyze": "vite build && echo 'Inspect dist/assets to see the code-split chunks from React.lazy'"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.51.11",
+    "axios": "^1.7.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.8",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@vitejs/plugin-react": "^4.3.1",
+    "jsdom": "^24.1.1",
+    "vite": "^5.4.0",
+    "vitest": "^2.0.5"
+  }
+}

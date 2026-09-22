@@ -1,0 +1,194 @@
+# ============================================================
+# 🧠 CONCEPT: docker-compose — "how would you deploy this?"
+# WHY IT MATTERS (interview angle): a near-guaranteed question, and the
+#   good answer explains what containers actually solve:
+#   • REPRODUCIBILITY — "works on my machine" becomes "works in the image".
+#     The image pins the OS, Node version and native dependencies.
+#   • DEPENDENCY ISOLATION — MongoDB 7 for this project and MongoDB 5 for
+#     another can coexist with no conflict.
+#   • DEV/PROD PARITY — the same image runs locally, in CI and in prod.
+#   • ONE-COMMAND ONBOARDING — `docker compose up` instead of a page of
+#     install instructions.
+#
+#   ⚠️ compose vs Kubernetes: compose is for a SINGLE HOST — development,
+#   CI, or a small single-server deployment. It has no multi-node
+#   scheduling, no rolling updates, no self-healing across machines. In
+#   production you use Kubernetes, ECS, or a PaaS. Saying "I'd use compose
+#   in prod" for anything that needs to scale is the wrong answer; saying
+#   "compose for dev and CI, Kubernetes for prod" is the right one.
+#
+# Usage (this is the easiest way to run this project — you do not need
+# MongoDB or Redis installed locally):
+#     docker compose up -d
+#     docker compose exec api npm run seed
+#     open http://localhost:5000/api/health
+#     docker compose logs -f api
+#     docker compose down -v          # -v also removes the data volumes
+# ============================================================
+
+services:
+  # ------------------------------------------------------------------
+  # MongoDB
+  # ------------------------------------------------------------------
+  mongo:
+    image: mongo:7
+    container_name: mern-mongo
+    restart: unless-stopped
+    ports:
+      # ⚠️ Publishing the DB port to the host is a DEVELOPMENT convenience
+      # (it lets you connect with Compass). In production you would NOT
+      # expose the database to the outside world at all — only the app
+      # network would reach it.
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_DATABASE: mern_interview_boilerplate
+    volumes:
+      # ============================================================
+      # 🧠 CONCEPT: Named volumes = persistence
+      # WHY IT MATTERS (interview angle): containers are EPHEMERAL — their
+      #   filesystem is destroyed on removal. Without a volume, every
+      #   `docker compose down` wipes your database. A named volume lives
+      #   outside the container lifecycle, which is how stateful services
+      #   work in containers at all.
+      #   ⭐ This is also exactly why file UPLOADS written to a container's
+      #   local disk are a bad idea (see middleware/upload.js): they vanish
+      #   on redeploy and are invisible to other replicas. Object storage
+      #   (S3) is the answer there, not a volume.
+      # ============================================================
+      - mongo-data:/data/db
+    healthcheck:
+      # ============================================================
+      # 🧠 CONCEPT: Healthchecks + depends_on: service_healthy
+      # WHY IT MATTERS (interview angle): plain `depends_on` only waits for
+      #   the container to START, not to be READY. Mongo takes several
+      #   seconds to accept connections, so the API would boot first, fail
+      #   to connect and crash-loop. A healthcheck plus `condition:
+      #   service_healthy` makes the dependency real.
+      #   ⚠️ Even so, your app should still handle a DB that is temporarily
+      #   unreachable — orchestration reduces the window, it does not
+      #   eliminate it. See the retry/lifecycle handling in config/db.js.
+      # ============================================================
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ------------------------------------------------------------------
+  # Redis — the shared cache
+  # ------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: mern-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    # ============================================================
+    # 🧠 CONCEPT: maxmemory + an eviction policy
+    # WHY IT MATTERS (interview angle): without a memory limit, Redis grows
+    #   until the container is OOM-killed — taking your cache (and, if you
+    #   also store sessions there, everyone's session) with it.
+    #   `allkeys-lru` evicts the least-recently-used key when full, which
+    #   is the correct policy for a pure CACHE. ⚠️ But if Redis also holds
+    #   data you cannot lose (a job queue, sessions), allkeys-lru will
+    #   silently DELETE it — there you want `noeviction` and separate
+    #   instances for cache vs durable data. That distinction is a good
+    #   thing to raise unprompted.
+    # ============================================================
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ------------------------------------------------------------------
+  # The Express API
+  # ------------------------------------------------------------------
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      # Build the `dev` stage, which includes nodemon and the dev
+      # dependencies. See the build-target concept block in the Dockerfile.
+      # For a production image, drop this line (it then builds the final,
+      # slim `runtime` stage).
+      target: dev
+    container_name: mern-api
+    restart: unless-stopped
+    ports:
+      - '5000:5000'
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      # ============================================================
+      # 🧠 CONCEPT: Service names are DNS hostnames
+      # WHY IT MATTERS (interview angle): note `mongo:27017`, not
+      #   `localhost:27017`. Each container has its own network namespace,
+      #   so `localhost` inside the api container means the api container
+      #   itself. Compose creates a network where each SERVICE NAME
+      #   resolves to that container's IP. Using localhost in a container
+      #   and wondering why the DB is unreachable is the single most common
+      #   Docker networking mistake.
+      # ============================================================
+      MONGO_URI: mongodb://mongo:27017/mern_interview_boilerplate
+      MONGO_URI_TEST: mongodb://mongo:27017/mern_interview_boilerplate_test
+      REDIS_URL: redis://redis:6379
+      CLIENT_ORIGIN: http://localhost:5173
+      # Dev-only secrets. In production these come from a secrets manager
+      # (AWS Secrets Manager, Vault, Kubernetes Secrets) — NEVER from a
+      # committed compose file.
+      JWT_ACCESS_SECRET: dev-compose-access-secret-not-for-production-use
+      JWT_REFRESH_SECRET: dev-compose-refresh-secret-not-for-production-use
+      LOG_LEVEL: debug
+      ENABLE_CRON_JOBS: 'false'
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      # Bind-mount the source for live reload via nodemon...
+      - ./server:/app
+      # ...but keep the container's own node_modules. Without this
+      # anonymous volume, the host bind-mount would SHADOW /app/node_modules
+      # and the container would find no dependencies — a classic and very
+      # confusing Docker + Node problem.
+      - /app/node_modules
+    healthcheck:
+      test: ['CMD', 'node', '-e', "require('http').get('http://localhost:5000/api/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # ------------------------------------------------------------------
+  # The React dev server
+  # ------------------------------------------------------------------
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      # The `dev` stage runs the Vite dev server with HMR. Drop this to
+      # build the nginx-served production image instead.
+      target: dev
+    container_name: mern-client
+    restart: unless-stopped
+    ports:
+      - '5173:5173'
+    environment:
+      # Vite binds to localhost by default, which is unreachable from
+      # outside the container. --host makes it listen on 0.0.0.0.
+      VITE_API_URL: http://localhost:5000
+    depends_on:
+      - api
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  mongo-data:
+  redis-data:

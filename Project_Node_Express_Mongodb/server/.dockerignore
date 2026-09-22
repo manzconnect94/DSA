@@ -1,0 +1,30 @@
+# ============================================================
+# 🧠 CONCEPT: .dockerignore — not just a tidiness file
+# WHY IT MATTERS (interview angle): everything in the build CONTEXT is
+#   uploaded to the Docker daemon before the build starts. Leave
+#   node_modules in and you ship hundreds of megabytes across that
+#   boundary on every build, making even a cached build slow.
+#   ⚠️ IT IS ALSO A SECURITY CONTROL: without it, `COPY . .` copies your
+#   `.env` (real secrets) and `.git` (the entire history, including any
+#   secret ever committed and later "removed") INTO THE IMAGE. Anyone who
+#   can pull that image can read them. This is a real and frequent leak.
+#   ⚠️ And a correctness one: a host node_modules built on Windows/macOS
+#   contains platform-specific native binaries that will not run in a
+#   Linux container.
+# ============================================================
+
+node_modules
+npm-debug.log
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+coverage
+tests
+*.test.js
+uploads/*
+!uploads/.gitkeep
+Dockerfile
+.dockerignore
+README.md
